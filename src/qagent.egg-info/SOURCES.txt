@@ -1,0 +1,13 @@
+pyproject.toml
+src/qagent/agent.py
+src/qagent/cli.py
+src/qagent/duckdb_tools.py
+src/qagent/llm_openai.py
+src/qagent/util.py
+src/qagent.egg-info/PKG-INFO
+src/qagent.egg-info/SOURCES.txt
+src/qagent.egg-info/dependency_links.txt
+src/qagent.egg-info/entry_points.txt
+src/qagent.egg-info/requires.txt
+src/qagent.egg-info/top_level.txt
+src/test/test_llm.py

@@ -1,0 +1,14 @@
+[project]
+name = "qagent"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "typer>=0.12.0",
+  "rich>=13.7.0",
+  "duckdb>=1.0.0",
+  "openai>=1.0.0",
+  "pydantic>=2.6.0",
+]
+
+[project.scripts]
+qagent = "qagent.cli:app"
