@@ -1,19 +1,17 @@
 
 # SQL Optimizer Agent (MVP) — `qagent`
 
-Coding Agent focus on sql optimizer, which coudl fetch schema information and duckdb best practice. 
-SQL optimization is highly context dependent task, which means that need the schema and row counts and explain execuation plan to get scan info. 
+Coding agent focused on SQL optimization, with particular emphasis on DuckDB best practices. Because SQL performance is highly context-dependent, the agent retrieves schema metadata, row counts, and execution plan details to inform optimization decisions.
 
-A CLI agent that benchmarks a SQL query on a local DuckDB database, asks an LLM to propose an optimized rewrite, rebenchmarks the candidate, and stops once it reaches an improvement threshold or hits `--max-iters`.
+
+The tool operates as a CLI agent that benchmarks a SQL query on a local DuckDB database, asks an LLM to propose an optimized rewrite, rebenchmarks the candidate, and stops once it reaches an improvement threshold or hits `--max-iters`.
 
 - inspects referenced relations (catalog + schema),
 - benchmarks using `EXPLAIN ANALYZE`,
 - proposes rewrite(s),
 - rebenchmarks and reports performance improvement.
 
-<img width="2488" height="310" alt="image" src="https://github.com/user-attachments/assets/3a2963f3-be22-4b3e-893d-d6780f13d956" />
-<img width="1244" height="509" alt="image" src="https://github.com/user-attachments/assets/82cea6b6-ce61-4929-8798-7dbf15877d19" />
-<img width="1239" height="481" alt="image" src="https://github.com/user-attachments/assets/1f46e1f1-70f4-447d-90af-f8164c92295b" />
+<img width="306" height="139" alt="image" src="https://github.com/user-attachments/assets/f753b73c-b6a9-48f2-8f47-da4ceec345e5" />
 
 
 ---
@@ -83,13 +81,51 @@ What you should see:
 
 ## 4) How the Agent Works 
 
-providing available tools. 
+<img width="2488" height="310" alt="image" src="https://github.com/user-attachments/assets/3a2963f3-be22-4b3e-893d-d6780f13d956" />
+<img width="1244" height="509" alt="image" src="https://github.com/user-attachments/assets/82cea6b6-ce61-4929-8798-7dbf15877d19" />
+<img width="1239" height="481" alt="image" src="https://github.com/user-attachments/assets/1f46e1f1-70f4-447d-90af-f8164c92295b" />
 
-explain the process: 
-- 
+
+
+```
+User SQL → Plan Analysis → Rewrite → Benchmark → Compare → Iterate → Best Query
+```
+
+### 4.1 Tooling Architecture
+
+The agent currently uses 5 core tools:
+
+1️⃣ **list_tables**  
+**Purpose:** Discover schema objects and establish database context.  
+**Used when:** Unknown tables or schema awareness is needed.
+
+2️⃣ **describe_relation**  
+**Purpose:** Retrieve columns and types; infer join keys and filter candidates.  
+**Why:** Schema awareness improves rewrite quality.
+
+3️⃣ **explain**  
+**Purpose:** Get logical and physical plans.  
+**Detects:** Join explosions, full scans, non-sargable predicates, large aggregates, unnecessary sorts.  
+**Note:** Primary reasoning signal.
+
+4️⃣ **explain_analyze / benchmark**  
+**Purpose:** Execute with timing to obtain ground-truth performance.  
+**Key:** Relies on execution feedback, not heuristics.
+
+5️⃣ **benchmark comparison (internal)**  
+**Purpose:** Compare candidate vs. baseline, accept only improvements, track best variant.  
+**Benefit:** Prevents regressions and hallucinated optimizations.
+
+
 
 
 ## 5) Example: Successful Optimization (Bad vs Optimized)
+
+- Original: **~17 ms median**
+- Optimized: **~11.5 ms** median
+- Improvement: **~33%** over baseline
+
+
 
 ### 5.1 Bad query
 
@@ -232,6 +268,23 @@ PROJECTION
 
 ## Extention to Data Warehouse SQL Optimization
 
-SQL Optimization on relation database is limited running on cache. can't create index ... 
-but for data warehouse, there are a lot of optimization hack tech. 
-I tried this agent with 
+The current prototype uses DuckDB for convenience and reproducibility. **However, local relational databases are not the primary environment where SQL optimization creates meaningful value.**
+
+Local relational databases such as DuckDB typically operate on single node execution and minimal concurrency, so most quires already run within seconds or minutes and manual optimization yields marginal benefit.
+
+Modern warehouse engines (Snowflake, BigQuery, Redshift, Databricks, etc.) introduce optimization dimensions that do not exist in local engines:
+- Partition pruning
+- Clustering / sort keys
+- File formats and compression
+- Statistics availability
+- Data locality
+
+During my evaluation on real world warehouse workloads(internship), the agent demonstrated substantial performance improvements.
+- 40%–79% runtime reduction across multiple production jobs
+- Significant gains even for complex multi-join analytical queries
+- Even complex 400+ line queries achieved meaningful improvements, although with slightly reduced consistency due to larger optimization search space.
+
+<img width="2040" height="706" alt="image" src="https://github.com/user-attachments/assets/75bcd29e-bc41-4746-a40e-040db01188ba" />
+
+The internship results validate that the approach is not only feasible but highly effective in real-world systems.
+
