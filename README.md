@@ -1,8 +1,8 @@
 
-# SQL Optimizer Agent (MVP) — `qagent`
+# Coding Agent - SQL Optimizer `qagent`
 
-Coding agent focused on SQL optimization, with particular emphasis on DuckDB best practices. Because SQL performance is highly context-dependent, the agent retrieves schema metadata, row counts, and execution plan details to inform optimization decisions.
-
+Coding agent focused on SQL optimization. 
+SQL performance is highly context-dependent, the agent retrieves schema metadata, row counts, and execution plan details to inform optimization decisions.
 
 The tool operates as a CLI agent that benchmarks a SQL query on a local DuckDB database, asks an LLM to propose an optimized rewrite, rebenchmarks the candidate, and stops once it reaches an improvement threshold or hits `--max-iters`.
 
