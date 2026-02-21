@@ -3,6 +3,11 @@
 
 A minimal CLI agent that benchmarks a SQL query on a local DuckDB database, asks an LLM to propose an optimized rewrite, rebenchmarks the candidate, and stops once it reaches an improvement threshold or hits `--max-iters`.
 
+- inspects referenced relations (catalog + schema),
+- benchmarks using `EXPLAIN ANALYZE`,
+- proposes rewrite(s),
+- rebenchmarks and reports performance improvement.
+
 ---
 
 ## 1) Install & Configure
@@ -35,7 +40,7 @@ export OPENAI_API_KEY="YOUR_KEY_HERE"
 ```
 
 
-## 2) Database Setup (MIMIC-IV on DuckDB)
+## 2) Database Setup (on DuckDB)
 
 This project assumes you already have a DuckDB database file built from MIMIC-IV (or any other database). You only need:
 
@@ -49,11 +54,12 @@ The tables referenced by the SQL (e.g. mimiciv_icu.icustays, mimiciv_icu.chartev
 ## 3) Quick Run 
 
 Run the optimizer against a query file:
-
+```
 qagent \
   --db /Users/chloe/Desktop/healthcare/mimic-iv-3.1/buildmimic/duckdb/mimic4.db \
   --query-file /Users/chloe/Desktop/uw_madison/26Spring/AI_Agent/sql-optimizer-agent/src/test/bad.sql \
   --max-iters 2
+```
 
 What you should see:
 
