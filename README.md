@@ -11,7 +11,7 @@ The tool operates as a CLI agent that benchmarks a SQL query on a local DuckDB d
 - proposes rewrite(s),
 - rebenchmarks and reports performance improvement.
 
-<img width="306" height="139" alt="image" src="https://github.com/user-attachments/assets/f753b73c-b6a9-48f2-8f47-da4ceec345e5" />
+<img width="2298" height="1098" alt="image" src="https://github.com/user-attachments/assets/c4476f87-594b-4193-a984-593ab21b28a2" />
 
 
 ---
