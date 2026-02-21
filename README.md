@@ -1,7 +1,10 @@
 
 # SQL Optimizer Agent (MVP) — `qagent`
 
-A minimal CLI agent that benchmarks a SQL query on a local DuckDB database, asks an LLM to propose an optimized rewrite, rebenchmarks the candidate, and stops once it reaches an improvement threshold or hits `--max-iters`.
+Coding Agent focus on sql optimizer, which coudl fetch schema information and duckdb best practice. 
+SQL optimization is highly context dependent task, which means that need the schema and row counts and explain execuation plan to get scan info. 
+
+A CLI agent that benchmarks a SQL query on a local DuckDB database, asks an LLM to propose an optimized rewrite, rebenchmarks the candidate, and stops once it reaches an improvement threshold or hits `--max-iters`.
 
 - inspects referenced relations (catalog + schema),
 - benchmarks using `EXPLAIN ANALYZE`,
