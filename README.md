@@ -48,13 +48,14 @@ export OPENAI_API_KEY="YOUR_KEY_HERE"
 
 ## 2) Database Setup (on DuckDB)
 
-This project assumes you already have a DuckDB database file built from MIMIC-IV (or any other database). You only need:
+This project needs a DuckDB database file. For example, built from MIMIC-IV or any other database. You only need:
 
 - A DuckDB .db file path
 
 The tables referenced by the SQL (e.g. mimiciv_icu.icustays, mimiciv_icu.chartevents, mimiciv_hosp.labevents)
 
-[what is mimic dataset]
+MIMIC-IV is a patient EHR dataset. 
+https://github.com/MIT-LCP/mimic-code/tree/main/mimic-iv/buildmimic/duckdb
 
 
 ## 3) Quick Run 
