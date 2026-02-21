@@ -8,6 +8,11 @@ A minimal CLI agent that benchmarks a SQL query on a local DuckDB database, asks
 - proposes rewrite(s),
 - rebenchmarks and reports performance improvement.
 
+<img width="2488" height="310" alt="image" src="https://github.com/user-attachments/assets/3a2963f3-be22-4b3e-893d-d6780f13d956" />
+<img width="1244" height="509" alt="image" src="https://github.com/user-attachments/assets/82cea6b6-ce61-4929-8798-7dbf15877d19" />
+<img width="1244" height="161" alt="image" src="https://github.com/user-attachments/assets/cb0839cf-2a2a-4ee7-90fe-d3863ed4ca5f" />
+
+
 ---
 
 ## 1) Install & Configure
