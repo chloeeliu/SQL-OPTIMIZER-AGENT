@@ -114,3 +114,146 @@ Notes for MVP:
 Improvements are validated via measured runtime, not by LLM claims.
 
 The agent currently focuses on runtime, not semantic equivalence checks.
+
+## 5) Example: Successful Optimization (Bad vs Optimized)
+
+### 5.1 Bad query
+
+A typical “bad” query pattern in EHR analytics is selecting * and joining large event tables without limiting output columns:
+
+```
+SELECT *
+FROM mimiciv_icu.icustays i
+JOIN mimiciv_icu.chartevents ce
+  ON ce.subject_id = i.subject_id
+JOIN mimiciv_hosp.labevents le
+  ON le.subject_id = i.subject_id
+WHERE i.stay_id = 30008792
+  AND ce.charttime BETWEEN i.intime AND i.outtime
+  AND le.charttime BETWEEN i.intime AND i.outtime;
+```
+
+```
+Query Profiling Summary
+-----------------------
+Total Time: 0.0167 s
+Output Rows: 946,400
+
+
+Execution Plan
+---------------------------
+
+PROJECTION
+  Output: multiple columns from icustays, chartevents, labevents
+  Rows: 946,400
+
+HASH JOIN (INNER)
+  Condition:
+    subject_id = subject_id
+    charttime >= intime
+    charttime <= outtime
+  Rows: 946,400
+  Time: 0.01 s
+
+  ├── TABLE SCAN: chartevents
+  │     Type: Sequential Scan
+  │     Rows: 5,600
+  │
+  └── HASH JOIN (INNER)
+        Condition:
+          subject_id = subject_id
+          charttime BETWEEN intime AND outtime
+        Rows: 169
+
+        ├── TABLE SCAN: labevents
+        │     Type: Sequential Scan
+        │     Rows: 169
+        │
+        └── TABLE SCAN: icustays
+              Type: Sequential Scan
+              Filter: stay_id = 30008792
+              Rows: 1
+```
+
+In one run, the baseline benchmark reported a median time around:
+- **~17 ms median**
+
+### 5.2 Optimized query (best SQL)
+- Avoids SELECT *
+- Moves time filters into join predicates
+- Selects only relevant columns
+
+```
+SELECT
+  i.subject_id, i.hadm_id, i.stay_id,
+  i.first_careunit, i.last_careunit,
+  i.intime, i.outtime, i.los,
+  ce.charttime, ce.itemid, ce.value, ce.valuenum,
+  le.charttime AS lab_charttime,
+  le.itemid    AS lab_itemid,
+  le.value     AS lab_value,
+  le.valuenum  AS lab_valuenum
+FROM mimiciv_icu.icustays i
+JOIN mimiciv_icu.chartevents ce
+  ON ce.subject_id = i.subject_id
+ AND ce.charttime BETWEEN i.intime AND i.outtime
+JOIN mimiciv_hosp.labevents le
+  ON le.subject_id = i.subject_id
+ AND le.charttime BETWEEN i.intime AND i.outtime
+WHERE i.stay_id = 30008792;
+```
+
+In the same run, the candidate benchmark reported:
+
+- **~11.5 ms** median
+- **~33%** improvement over baseline
+- Agent stopped early because improvement met the threshold.
+
+
+```
+Query Profiling Summary
+-----------------------
+Total Time: 0.0102 s
+Output Rows: 946,400
+
+
+Execution Plan
+---------------------------
+PROJECTION
+  Columns:
+    subject_id, hadm_id, stay_id,
+    first_careunit, last_careunit,
+    intime, outtime, los,
+    charttime, itemid, value, valuenum,
+    lab_charttime, lab_itemid, lab_value, lab_valuenum
+  Rows: 946,400
+
+└── HASH JOIN (INNER)
+      Condition:
+        subject_id = subject_id
+        charttime BETWEEN intime AND outtime
+      Rows: 946,400
+      Time: 0.01 s
+
+      ├── TABLE SCAN: chartevents
+      │     Type: Sequential Scan
+      │     Rows: 5,600
+      │
+      └── HASH JOIN (INNER)
+            Condition:
+              subject_id = subject_id
+              charttime BETWEEN intime AND outtime
+            Rows: 169
+
+            ├── TABLE SCAN: labevents
+            │     Type: Sequential Scan
+            │     Rows: 169
+            │
+            └── TABLE SCAN: icustays
+                  Type: Sequential Scan
+                  Filter: stay_id = 30008792
+                  Rows: 1
+```
+
+
+## Extention to Data Warehouse SQL Optimization
