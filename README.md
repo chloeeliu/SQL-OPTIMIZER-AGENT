@@ -10,7 +10,7 @@ A minimal CLI agent that benchmarks a SQL query on a local DuckDB database, asks
 
 <img width="2488" height="310" alt="image" src="https://github.com/user-attachments/assets/3a2963f3-be22-4b3e-893d-d6780f13d956" />
 <img width="1244" height="509" alt="image" src="https://github.com/user-attachments/assets/82cea6b6-ce61-4929-8798-7dbf15877d19" />
-<img width="1244" height="161" alt="image" src="https://github.com/user-attachments/assets/cb0839cf-2a2a-4ee7-90fe-d3863ed4ca5f" />
+<img width="1239" height="481" alt="image" src="https://github.com/user-attachments/assets/1f46e1f1-70f4-447d-90af-f8164c92295b" />
 
 
 ---
@@ -80,45 +80,11 @@ What you should see:
 
 ## 4) How the Agent Works 
 
-At a high level, qagent optimize does the following:
+providing available tools. 
 
-Load input query
+explain the process: 
+- 
 
-Reads SQL from --query-file (or --query if supported)
-
-Baseline benchmark
-
-Runs a small benchmark loop (e.g., warmup + N runs)
-
-Reports elapsed_ms and median_ms
-
-Captures an EXPLAIN ANALYZE sample for profiling context
-
-Optimization loop (up to --max-iters)
-
-Sends the original SQL + profiling context to the LLM
-
-The LLM returns a rewritten SQL candidate and a short rationale
-
-The agent benchmarks the candidate SQL the same way
-
-If improvement ≥ threshold, stop early; else continue
-
-Pick best candidate
-
-Tracks the best-performing SQL across iterations
-
-Outputs:
-
-Best SQL (final)
-
-Best report (bench numbers + model text)
-
-Notes for MVP:
-
-Improvements are validated via measured runtime, not by LLM claims.
-
-The agent currently focuses on runtime, not semantic equivalence checks.
 
 ## 5) Example: Successful Optimization (Bad vs Optimized)
 
@@ -262,3 +228,7 @@ PROJECTION
 
 
 ## Extention to Data Warehouse SQL Optimization
+
+SQL Optimization on relation database is limited running on cache. can't create index ... 
+but for data warehouse, there are a lot of optimization hack tech. 
+I tried this agent with 
